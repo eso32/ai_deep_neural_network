@@ -1,0 +1,94 @@
+<!-- ============================================================ -->
+<!-- SEKCJA 1: Projekt A — RAG Konstytucja                         -->
+<!-- ============================================================ -->
+<section>
+<section data-markdown><textarea data-template>
+## Projekt A: RAG — Konstytucja RP
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+### Opis zadania
+
+Zbuduj system **pytanie-odpowiedz** oparty na tekscie Konstytucji Rzeczypospolitej Polskiej.
+
+Uzytkownik zadaje pytanie po polsku, a system:
+1. Wyszukuje odpowiednie fragmenty Konstytucji
+2. Generuje odpowiedz **wylacznie** na podstawie znalezionych fragmentow
+3. Podaje **zrodlo** (numer artykulu / rozdzialu)
+
+Przyklad:
+```
+Pytanie: Kto moze byc prezydentem Polski?
+
+Odpowiedz: Wedlug Art. 127 Konstytucji RP, na Prezydenta
+Rzeczypospolitej moze byc wybrany obywatel polski, ktory
+najpozniej w dniu wyborow konczy 35 lat i korzysta z pelni
+praw wyborczych do Sejmu.
+```
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+### Wymagania techniczne
+
+**Zrodlo danych:**
+- Tekst Konstytucji RP (dostepny na sejm.gov.pl lub w formacie PDF/TXT)
+
+**Pipeline indeksowania:**
+- Podziel tekst na chunki (np. per artykul lub per akapit)
+- Wygeneruj embeddingi (OpenAI, HuggingFace lub inny model)
+- Zapisz w vector store (ChromaDB, FAISS lub inny)
+
+**Pipeline zapytan:**
+- Przyjmij pytanie od uzytkownika
+- Wyszukaj top-k najblizszych chunkow
+- Skonstruuj prompt z kontekstem
+- Wygeneruj odpowiedz z LLM (OpenAI API, Ollama lub inny)
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+### Wskazowki
+
+**Chunking:**
+- Konstytucja ma naturalna strukture: rozdzialy, artykuly, ustepy
+- Warto podzielic per artykul (kazdy artykul = 1 chunk)
+- Dodaj metadane: numer rozdzialu, numer artykulu
+
+**System prompt:**
+```
+Jestes ekspertem od Konstytucji RP.
+Odpowiadaj WYLACZNIE na podstawie podanego kontekstu.
+Zawsze podawaj numer artykulu.
+Jesli nie znajdziesz odpowiedzi — powiedz
+"Nie znalazlem odpowiedzi w Konstytucji."
+```
+
+**Testowe pytania:**
+- "Jakie prawa ma obywatel polski?"
+- "Kto powoluje premiera?"
+- "Ile trwa kadencja Sejmu?"
+- "Kiedy mozna wprowadzic stan wyjatkowy?"
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+### Co dostarczyc (zrzuty ekranu) (1/2)
+Uwaga: dwa slajdy z listą screenshotów!
+
+**Screenshot 1:** Kod pipeline'u indeksowania
+- Widoczny: ladowanie tekstu, chunking, embeddingi, zapis do vector store
+
+**Screenshot 2:** Kod pipeline'u zapytan
+- Widoczny: wyszukiwanie, augmentacja promptu, generowanie odpowiedzi
+
+</textarea></section>
+<section data-markdown><textarea data-template>
+### Co dostarczyc (zrzuty ekranu) (2/2)
+
+**Screenshot 3:** Przyklad dzialania — pytanie + odpowiedz
+- Minimum **3 rozne pytania** z odpowiedziami
+- Odpowiedzi musza zawierac numery artykulow
+
+**Screenshot 4:** Przyklad halucynacji lub odmowy
+- Zadaj pytanie, na ktore Konstytucja nie odpowiada
+- System powinien powiedziec "nie wiem" zamiast halucynowac
+</textarea></section>
+</section>
