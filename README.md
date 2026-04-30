@@ -6,19 +6,19 @@ A question-answering system built on the text of the **Constitution of the Repub
 
 ## 📌 Overview
 
-The user asks a question in Polish, and the system:
+The user asks a question in English, and the system:
+
 1. 🔍 Searches for relevant fragments of the Constitution in a vector database
 2. 🧠 Generates an answer **strictly** based on the retrieved fragments
 3. 📎 Cites the **source** (article number / chapter)
 
 **Example:**
-```
-Question: Kto może być prezydentem Polski?
 
-Answer: Według Art. 127 Konstytucji RP, na Prezydenta
-Rzeczypospolitej może być wybrany obywatel polski, który
-najpóźniej w dniu wyborów kończy 35 lat i korzysta z pełni
-praw wyborczych do Sejmu.
+```
+Question: Who appoints the Prime Minister?
+
+Answer: The Prime Minister is appointed by the President of the Republic
+of Poland, as stated in Article 154.
 ```
 
 ---
@@ -27,30 +27,30 @@ praw wyborczych do Sejmu.
 
 ### 📥 Indexing Pipeline
 
-1. Download `konstytucja.pdf` from sejm.gov.pl
+1. Download `constitution.pdf` from sejm.gov.pl
 2. Extract raw text with `pypdf`
 3. Split into chunks per article using regex `Art\. \d+\.`
-4. Generate embeddings with `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`
-5. Persist to ChromaDB at `./chroma_db`
+4. Generate embeddings with **OpenAI `text-embedding-3-small`**
+5. Persist to ChromaDB at `./chroma_db2`
 
 ### 💬 Query Pipeline
 
 1. Accept a question from the user
-2. Retrieve top-k nearest chunks via `similarity_search`
+2. Retrieve the nearest chunk via `similarity_search` (k=1)
 3. Build an augmented prompt with retrieved context
-4. Generate an answer using `gpt-4o-mini` via a LangGraph ReAct agent
+4. Generate an answer using `gpt-4o-mini` via a LangChain ReAct agent
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| 🔗 Orchestration | [LangChain](https://www.langchain.com/) + [LangGraph](https://www.langchain.com/langgraph) |
-| 🗄️ Vector Store | [ChromaDB](https://www.trychroma.com/) |
-| 🔢 Embeddings | [sentence-transformers](https://www.sbert.net/) (`paraphrase-multilingual-MiniLM-L12-v2`) |
-| 🤖 LLM | [OpenAI API](https://openai.com/api/) (`gpt-4o-mini`) |
-| 📄 PDF Parsing | [pypdf](https://pypdf.readthedocs.io/) |
+| Component        | Technology                                                       |
+| ---------------- | ---------------------------------------------------------------- |
+| 🔗 Orchestration | [LangChain](https://www.langchain.com/)                          |
+| 🗄️ Vector Store  | [ChromaDB](https://www.trychroma.com/)                           |
+| 🔢 Embeddings    | [OpenAI API](https://openai.com/api/) (`text-embedding-3-small`) |
+| 🤖 LLM           | [OpenAI API](https://openai.com/api/) (`gpt-4o-mini`)            |
+| 📄 PDF Parsing   | [pypdf](https://pypdf.readthedocs.io/)                           |
 
 ---
 
@@ -58,55 +58,47 @@ praw wyborczych do Sejmu.
 
 ### ☁️ Google Colab / Kaggle (recommended)
 
-1. Upload `sggw-zaliczenie-deep-neural-net.ipynb` to Colab
+1. Upload `rag-constitution.ipynb` to Colab
 2. Run all cells top-to-bottom — the first cells install dependencies via `pip install -qq`
-3. Set your OpenAI API key in the `API_KEY` variable (cell 13)
+3. Set your OpenAI API key as the `OPENAI_API_KEY` environment variable
 
 ### 💻 Locally
 
 ```bash
 pip install langchain langchain-community langchain-openai langchain-huggingface \
-            chromadb sentence-transformers pypdf tiktoken langgraph
+            chromadb sentence-transformers pypdf tiktoken python-dotenv
 
-jupyter notebook sggw-zaliczenie-deep-neural-net.ipynb
+jupyter notebook rag-constitution.ipynb
 ```
+
+Set `OPENAI_API_KEY` in a `.env` file — the notebook loads it via `python-dotenv`.
 
 ---
 
 ## 🧩 System Prompt
 
 ```
-Jesteś ekspertem od Konstytucji RP.
-Odpowiadaj WYŁĄCZNIE na podstawie podanego kontekstu.
-Zawsze podawaj numer artykułu.
-Jeśli nie znajdziesz odpowiedzi — powiedz "Nie wiem".
+You are an expert on the Constitution of the Republic of Poland.
+Answer EXCLUSIVELY based on the provided context.
+Always provide the article number.
+If you cannot find the answer — say "I did not find the answer in the Constitution."
 ```
 
 ---
 
 ## 🧪 Sample Test Questions
 
-- 🗳️ *"Jakie prawa ma obywatel polski?"*
-- 👔 *"Kto powołuje premiera?"*
-- 🏛️ *"Ile trwa kadencja Sejmu?"*
-- ⚠️ *"Kiedy można wprowadzić stan wyjątkowy?"*
+- 👔 _"Who appoints the Prime Minister?"_
+- 🏛️ _"How long is the term of the Sejm?"_
+- ⚠️ _"When can a state of emergency be introduced?"_
 
 ---
 
 ## 📸 Required Screenshots
 
-| # | Content |
-|---|---------|
-| 1️⃣ | **Indexing pipeline** — text loading, chunking, embeddings, saving to vector store |
-| 2️⃣ | **Query pipeline** — retrieval, prompt augmentation, answer generation |
-| 3️⃣ | **3+ example Q&As** with answers citing article numbers |
-| 4️⃣ | **Off-topic question** — system responds "Nie wiem" instead of hallucinating |
-
----
-
-## ⚠️ Known Issues
-
-- `vectorstore.persist()` is deprecated in newer ChromaDB versions — persistence is automatic when `persist_directory` is set
-- The PDF path defaults to `/kaggle/working/` — change to `./konstytucja.pdf` for Colab or local runs
-- The OpenAI API key is hardcoded in cell 13 — replace with `os.getenv("OPENAI_API_KEY")` or a Colab secret
-- `create_agent` does not exist in `langchain.agents` — use `from langgraph.prebuilt import create_react_agent` instead
+| #   | Content                                                                                                            |
+| --- | ------------------------------------------------------------------------------------------------------------------ |
+| 1️⃣  | **Indexing pipeline** — text loading, chunking, embeddings, saving to vector store                                 |
+| 2️⃣  | **Query pipeline** — retrieval, prompt augmentation, answer generation                                             |
+| 3️⃣  | **3+ example Q&As** with answers citing article numbers                                                            |
+| 4️⃣  | **Off-topic question** — system responds "I did not find the answer in the Constitution." instead of hallucinating |

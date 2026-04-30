@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Vector store
+chroma_db/
+chroma_db2/
+
+# Data files
+*.pdf
+
+# API keys / secrets
+.env
+.env.local
+secrets.json
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
